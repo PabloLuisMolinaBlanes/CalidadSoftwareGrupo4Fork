@@ -6,6 +6,8 @@ orbs:
 jobs:
   build-and-test:
     executor: android/android-machine
+      resource-class: large
+      tag: default
     steps:
       - checkout
       - restore_cache:  # Restore cached dependencies
