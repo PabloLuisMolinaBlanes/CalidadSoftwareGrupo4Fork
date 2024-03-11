@@ -1,45 +1,39 @@
-# This config was automatically generated from your source code
-# Stacks detected: deps:java:.,tool:gradle:
 version: 2.1
+
+orbs:
+  android: circleci/android@2.5.0  # Use the Android Orb
+
 jobs:
-  test-java:
-    docker:
-      - image: cimg/openjdk:17.0
+  build-and-test:
+    executor: android/android  # Use the Android executor
     steps:
       - checkout
       - run:
           name: Calculate cache key
-          command: |-
+          command: |
             find . -name 'pom.xml' -o -name 'gradlew*' -o -name '*.gradle*' | \
                     sort | xargs cat > /tmp/CIRCLECI_CACHE_KEY
       - restore_cache:
           key: cache-{{ checksum "/tmp/CIRCLECI_CACHE_KEY" }}
+      - android/gradle-cache  # Cache Gradle dependencies
       - run:
           name: chmod permissions
           command: chmod +x ./gradlew
       - run:
-          command: ./gradlew check
+          name: Run Gradle tasks
+          command: ./gradlew assembleDebug test
       - store_test_results:
-          path: build/test-results
+          path: app/build/test-results  # Update this path according to your project structure
       - save_cache:
           key: cache-{{ checksum "/tmp/CIRCLECI_CACHE_KEY" }}
           paths:
             - ~/.gradle/caches
       - store_artifacts:
-          path: build/reports
-  deploy:
-    # This is an example deploy job, not actually used by the workflow
-    docker:
-      - image: cimg/base:stable
-    steps:
-      # Replace this with steps to deploy to users
-      - run:
-          name: deploy
-          command: '#e.g. ./deploy.sh'
+          path: app/build/outputs  # Update this path according to your project structure
+
 workflows:
+  version: 2
   build-and-test:
     jobs:
-      - test-java
-    # - deploy:
-    #     requires:
-    #       - test-java
+      - build-and-test
+
