@@ -6,7 +6,6 @@ orbs:
 jobs:
   build-and-test:
     executor: android/android-machine
-      resource-class: large
       tag: default
     steps:
       - checkout
